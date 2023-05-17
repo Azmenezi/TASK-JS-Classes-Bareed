@@ -15,13 +15,13 @@ class Point {
     this.y = y;
   }
 
-  distanceTo = point => {
+  distanceTo = (point) => {
     let xDelta = this.x - point.x;
     let yDelta = this.y - point.y;
     return Math.sqrt(xDelta * xDelta + yDelta * yDelta); // PYTHAGORAS!
   };
 
-  equals = point => point.x === this.x && point.y === this.y;
+  equals = (point) => point.x === this.x && point.y === this.y;
 
   static randomPoint = (maxX, maxY) => {
     let x = Math.random() * (maxX || 100);
@@ -30,6 +30,10 @@ class Point {
   };
 }
 
+// const point1 = new Point(30, 20);
+let point = new Point(500, 200);
+
+console.log(point.distanceTo({ x: 102, y: 283 }));
 /**********************************************************
  * Wallet: keeps track of money
  *
@@ -43,13 +47,18 @@ class Point {
  **********************************************************/
 class Wallet {
   // implement Wallet!
-  constructor(money = 0) {}
+  constructor(money = 0) {
+    this.money = money;
+  }
 
-  credit = amount => {};
-
-  debit = amount => {};
+  credit = (amount) => (amount > 0 ? (this.money += amount) : undefined);
+  debit = (amount) => (amount > 0 ? (this.money -= amount) : undefined);
 }
 
+const wallet = new Wallet(100);
+wallet.credit(100);
+wallet.debit(100);
+console.log(wallet);
 /**********************************************************
  * Person: defines a person with a name (and feelings)
  *
@@ -63,8 +72,24 @@ class Wallet {
  **********************************************************/
 class Person {
   // implement Person!
+  name = "";
+  location = "";
+  wallet = 0;
+  constructor(name, x, y) {
+    this.name = name;
+    this.location = new Point(x, y);
+  }
+
+  moveTo = (point) => {
+    this.location = point;
+  };
 }
 
+let person = new Person("Aziz", 100, 200);
+console.log(person);
+person.moveTo(point);
+console.log(person);
+// console.log(person.location.distanceTo({ x: 102, y: 283 }));
 /**********************************************************
  * Vendor: defines a vendor
  * Subclasses Person
@@ -104,7 +129,7 @@ class Customer {
   // implement Customer!
 }
 
-export { Point, Wallet, Person, Customer, Vendor };
+// export { Point, Wallet, Person, Customer, Vendor };
 
 /***********************************************************
  * If you want examples of how to use the
