@@ -105,10 +105,20 @@ console.log(person);
  *
  * new vendor = new Vendor(name, x, y);
  **********************************************************/
-class Vendor {
+class Vendor extends Person {
   // implement Vendor!
-}
 
+  constructor(name, location, wallet, range = 5, price = 1) {
+    super(name, location, wallet);
+    this.range = range;
+    this.price = price;
+  }
+  sellTo = (customer, numberOfIceCreams) => {
+    this.location = customer.location;
+  };
+}
+const vendor = new Vendor("Aziz", 300, 200);
+console.log(vendor);
 /**********************************************************
  * Customer: defines a customer
  * Subclasses Person
