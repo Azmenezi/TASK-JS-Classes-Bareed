@@ -74,15 +74,13 @@ class Person {
   // implement Person!
   name = "";
   location = "";
-  wallet = 0;
   constructor(name, x, y) {
     this.name = name;
     this.location = new Point(x, y);
+    this.wallet = new Wallet();
   }
 
-  moveTo = (point) => {
-    this.location = point;
-  };
+  moveTo = (point) => (this.location = point);
 }
 
 let person = new Person("Aziz", 100, 200);
@@ -113,15 +111,21 @@ class Vendor extends Person {
     this.range = range;
     this.price = price;
   }
-  sellTo = (customer, numberOfIceCreams) => {
-    this.moveTo(customer.location);
-    let totalMoney = this.price * numberOfIceCreams;
-    this.wallet.credit(totalMoney);
-    customer.wallet.debit(totalMoney);
-  };
+  sellTo = (customer, numberOfIceCreams) => (
+    this.moveTo(customer.location),
+    this.wallet.credit(this.price * numberOfIceCreams),
+    customer.wallet.debit(this.price * numberOfIceCreams)
+  );
+
+  // sellTo = (customer, numberOfIceCreams) => {
+  //   this.moveTo(customer.location);
+  //   let totalMoney = this.price * numberOfIceCreams;
+  //   this.wallet.credit(totalMoney);
+  //   customer.wallet.debit(totalMoney);
+  // };
 }
 const vendor = new Vendor("Aziz", 300, 200);
-console.log(vendor);
+// console.log(vendor);
 /**********************************************************
  * Customer: defines a customer
  * Subclasses Person
@@ -143,35 +147,55 @@ class Customer extends Person {
   constructor(name, location, wallet) {
     super(name, location, wallet);
   }
-  _isInRange = (vendor) => {
-    let distance = this.location.distanceTo(vendor.location);
-    if (vendor.range < distance) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-  _haveEnoughMoney = (vendor, numberOfIceCreams) => {
-    if (this.wallet > vendor.price * numberOfIceCreams) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-  requestIceCream = (vendor, numberOfIceCreams) => {
-    if (
-      this._isInRange(vendor) &&
-      this._haveEnoughMoney(vendor, numberOfIceCreams)
-    ) {
-      sellTo();
-    }
-  };
+  _isInRange = (vendor) =>
+    vendor.range > this.location.distanceTo(vendor.location) ? true : false;
+
+  _haveEnoughMoney = (vendor, numberOfIceCreams) =>
+    this.wallet.money >= vendor.price * numberOfIceCreams ? true : false;
+
+  requestIceCream = (vendor, numberOfIceCreams) =>
+    !this._isInRange(vendor)
+      ? "out of range"
+      : !this._haveEnoughMoney(vendor, numberOfIceCreams)
+      ? "not enough money"
+      : (vendor.sellTo(this, numberOfIceCreams), "Done");
 }
 
 // export { Point, Wallet, Person, Customer, Vendor };
+const customer = new Customer("Turki", 300, 200);
+//console.log(customer._isInRange(vendor));
+customer.wallet.credit(200);
 
+// console.log(customer);
 /***********************************************************
  * If you want examples of how to use the
  * these classes and how to test your code manually,
  * check out the README.md file
  ***********************************************************/
+let vendorAsis = new Vendor("Asis", 10, 10); // create a new vendor named Asis at location (10,10)
+let nearbyCustomer = new Customer("MishMish", 11, 11); // create a new customer named MishMish at location (11,11)
+let distantCustomer = new Customer("Hamsa", 1000, 1000); // create a new customer named Hamsa at location (1000,1000)
+let brokeCustomer = new Customer("Maskeen", 12, 12); // create a new customer named Maskeen at location (12,12)
+nearbyCustomer.wallet.credit(200);
+brokeCustomer.wallet.money = 0; // steal all of Maskeen's money
+
+console.log(nearbyCustomer.requestIceCream(vendorAsis, 10)); // ask to buy 10 ice creams from Asis
+// money was transferred from MishMish to Asis
+nearbyCustomer.wallet.money; // 0 left
+vendorAsis.wallet.money; // 10
+// Asis moved to MishMish's location
+vendorAsis.location; // { x: 11, y: 11 }
+
+console.log(distantCustomer.requestIceCream(vendorAsis, 10)); // ask to buy 10 ice creams from Asis
+// no money was transferred because the request failed - Hamsa is too far away
+distantCustomer.wallet.money; // 10 left
+vendorAsis.wallet.money; // still only 10
+// Asis didn't move
+vendorAsis.location; // { x: 11, y: 11 }
+
+console.log(brokeCustomer.requestIceCream(vendorAsis, 1)); // ask to buy 1 ice creams from Asis
+// no money was transferred because the request failed - Maskeen doesn't have enough money to buy even one ice cream :(
+brokeCustomer.wallet.money; // 0
+vendorAsis.wallet.money; // still only 10
+// Asis didn't move
+vendorAsis.location; // { x: 11, y: 11 }
